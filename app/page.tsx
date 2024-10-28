@@ -7,6 +7,7 @@ export default function Home() {
         <SyntheticChart />
         <SyntheticChart />
         <SyntheticChart />
+        <SyntheticChart />
       </div>
     </div>
   );

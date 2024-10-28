@@ -1,3 +1,10 @@
+### TODO
+
+- Filter Treatment Network from Control Networks
+- Intervention Line
+
+---
+
 - predictor_prio
   - from date
   - to date

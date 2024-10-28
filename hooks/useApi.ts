@@ -44,7 +44,7 @@ export function useChartParams() {
           "scroll",
           "zksync_era",
         ])
-      ).withDefault(networkIds),
+      ).withDefault(networkIds.filter((network) => network !== networkIds[1])),
     },
     { history: "replace" }
   );

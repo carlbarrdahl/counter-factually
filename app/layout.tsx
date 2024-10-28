@@ -1,6 +1,11 @@
 import type { Metadata } from "next";
 import localFont from "next/font/local";
+import { NuqsAdapter } from "nuqs/adapters/next/app";
+import { type ReactNode } from "react";
+
+import Logo from "../public/logo.gif";
 import "./globals.css";
+import { Providers } from "./providers";
 
 const geistSans = localFont({
   src: "./fonts/GeistVF.woff",
@@ -14,7 +19,7 @@ const geistMono = localFont({
 });
 
 export const metadata: Metadata = {
-  title: "Synthetic Control",
+  title: "counter factually",
   description: "...",
 };
 
@@ -28,7 +33,22 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-        {children}
+        <NuqsAdapter>
+          <Providers>
+            <header className="pl-2  bg-[#ffdeee]">
+              <img src={Logo.src} />
+              {/* <video
+                loop
+                playsInline
+                className="h-16"
+                autoPlay
+                src={"./logo.mp4"}
+                muted
+              /> */}
+            </header>
+            <main>{children}</main>
+          </Providers>
+        </NuqsAdapter>
       </body>
     </html>
   );

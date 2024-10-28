@@ -7,7 +7,10 @@ import {
   LineChart,
   XAxis,
   Customized,
+  YAxis,
 } from "recharts";
+import { AlertCircle } from "lucide-react";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 
 import {
   Card,
@@ -22,11 +25,16 @@ import {
   ChartTooltip,
   ChartTooltipContent,
 } from "@/components/ui/chart";
+import { useApi, useChartParams } from "@/hooks/useApi";
+import { Button } from "@/components/ui/button";
+import { ChartNoAxesGantt, ChartSpline, TrendingUpDown } from "lucide-react";
+import { format } from "date-fns";
+import { cn } from "@/lib/utils";
 
 export const description = "A multiple line chart";
 
 const chartData = [
-  { month: "January", desktop: 186, mobile: 80 },
+  { month: "January", desktop: 586, mobile: 80 },
   { month: "February", desktop: 305, mobile: 200 },
   { month: "March", desktop: 237, mobile: 120 },
   { month: "April", desktop: 73, mobile: 190 },
@@ -46,17 +54,76 @@ const chartConfig = {
 } satisfies ChartConfig;
 
 export function SyntheticChart() {
+  const { data, isPending, error } = useApi();
+  const [params, setParams] = useChartParams();
+  console.log(123, data);
+
+  const startDate = data?.data[0]?.date;
+  const endDate = data?.data[data?.data.length - 1]?.date;
+
+  if (error)
+    return (
+      <Alert variant="destructive">
+        <AlertCircle className="h-4 w-4" />
+        <AlertTitle>Error</AlertTitle>
+        <AlertDescription>{error.toString()}</AlertDescription>
+      </Alert>
+    );
   return (
-    <Card>
+    <Card
+      className={cn({
+        ["animate-pulse opacity-50"]: isPending,
+      })}
+    >
       <CardHeader>
-        <CardTitle>Synthetic Control</CardTitle>
-        <CardDescription>2020 - 2024</CardDescription>
+        <CardTitle className="flex justify-between items-center">
+          {params.view === "default" ? "Synthetic Control" : "Impact Ratio"}
+          <div className="flex gap-1 items-center">
+            <Button
+              size="sm"
+              onClick={() => setParams({ smoothing: 1 })}
+              variant={params.smoothing === 1 ? "default" : "outline"}
+            >
+              Daily
+            </Button>
+            <Button
+              size="sm"
+              onClick={() => setParams({ smoothing: 7 })}
+              variant={params.smoothing === 7 ? "default" : "outline"}
+            >
+              7 days
+            </Button>
+            <Button
+              size="sm"
+              onClick={() => setParams({ smoothing: 30 })}
+              variant={params.smoothing === 30 ? "default" : "outline"}
+            >
+              1 month
+            </Button>
+
+            <Button
+              size="icon"
+              onClick={() =>
+                setParams({
+                  view: params.view === "default" ? "impact" : "default",
+                })
+              }
+            >
+              {params.view === "default" ? <TrendingUpDown /> : <ChartSpline />}
+            </Button>
+          </div>
+        </CardTitle>
+        <CardDescription>
+          {startDate} - {endDate}
+        </CardDescription>
       </CardHeader>
       <CardContent>
         <ChartContainer config={chartConfig}>
           <LineChart
             accessibilityLayer
-            data={chartData}
+            data={
+              data?.data ?? [{ date: "1900-01-01", treatment: 0, synthetic: 0 }]
+            }
             margin={{
               left: 12,
               right: 12,
@@ -64,27 +131,58 @@ export function SyntheticChart() {
           >
             <CartesianGrid vertical={false} />
             <XAxis
-              dataKey="month"
+              dataKey="date"
               tickLine={false}
               axisLine={false}
               tickMargin={8}
-              tickFormatter={(value) => value.slice(0, 3)}
+              minTickGap={64}
+              tickFormatter={(value) => {
+                return format(value, "yyyy-MM-dd");
+                const date = new Date(value);
+                return date.toLocaleDateString("en-US", {
+                  month: "short",
+                  day: "numeric",
+                });
+              }}
+              // tickFormatter={(value) => value.slice(0, 3)}
+            />
+            <YAxis
+              // dataKey="treatment"
+              tickLine={false}
+              axisLine={false}
+              tickMargin={8}
+              // tickFormatter={(value) => value.slice(0, 3)}
             />
             <ChartTooltip cursor={false} content={<ChartTooltipContent />} />
-            <Line
-              dataKey="desktop"
-              type="monotone"
-              stroke="var(--color-desktop)"
-              strokeWidth={2}
-              dot={false}
-            />
-            <Line
-              dataKey="mobile"
-              type="monotone"
-              stroke="var(--color-mobile)"
-              strokeWidth={2}
-              dot={false}
-            />
+            {params.view === "default" ? (
+              <>
+                <Line
+                  isAnimationActive={false}
+                  dataKey="treatment"
+                  type="monotone"
+                  stroke="var(--color-desktop)"
+                  strokeWidth={2}
+                  dot={false}
+                />
+                <Line
+                  isAnimationActive={false}
+                  dataKey="synthetic"
+                  type="monotone"
+                  stroke="var(--color-mobile)"
+                  strokeWidth={2}
+                  dot={false}
+                />
+              </>
+            ) : (
+              <Line
+                isAnimationActive={false}
+                dataKey="impact_ratio"
+                type="monotone"
+                stroke="var(--color-mobile)"
+                strokeWidth={2}
+                dot={false}
+              />
+            )}
             <Customized component={CustomizedCross} />
           </LineChart>
         </ChartContainer>

@@ -1,6 +1,5 @@
 "use client";
 
-import { TrendingUp } from "lucide-react";
 import {
   Cross,
   CartesianGrid,
@@ -14,7 +13,6 @@ import {
   Card,
   CardContent,
   CardDescription,
-  CardFooter,
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
@@ -57,8 +55,6 @@ export function SyntheticChart() {
       <CardContent>
         <ChartContainer config={chartConfig}>
           <LineChart
-            // width={500}
-            // height={500}
             accessibilityLayer
             data={chartData}
             margin={{
@@ -97,22 +93,21 @@ export function SyntheticChart() {
   );
 }
 
-const CustomizedCross = (props) => {
-  const { width, height, stroke, fill, formattedGraphicalItems } = props;
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const CustomizedCross = (props: any) => {
+  const { width, height, formattedGraphicalItems } = props;
   // get first series in chart
   const firstSeries = formattedGraphicalItems[0];
   // get any point at any index in chart
   const secondPoint = firstSeries?.props?.points[1];
-  console.log(props);
-  // render custom content using points from the graph
   return (
     <Cross
       y={height - 30}
       x={secondPoint?.x}
       height={height}
       width={width}
-      stroke={stroke ?? "#000"}
-      fill={fill ?? "none"}
+      stroke={"#000"}
+      fill={"none"}
     />
   );
 };

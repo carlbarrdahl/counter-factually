@@ -91,7 +91,9 @@ export function Settings() {
           onChange={(values) =>
             setParams({ controls_identifier: values.map((v) => v.value) })
           }
-          options={networks}
+          options={networks.filter(
+            (network) => network.value !== params.controls_identifier
+          )}
         />
       </div>
       <div className="flex-1">

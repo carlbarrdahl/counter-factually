@@ -3,7 +3,7 @@ import localFont from "next/font/local";
 import { NuqsAdapter } from "nuqs/adapters/next/app";
 import { type ReactNode } from "react";
 
-import Logo from "../public/logo.gif";
+import Logo from "./logo.gif";
 import "./globals.css";
 import { Providers } from "./providers";
 

@@ -8,6 +8,7 @@ export default function Home() {
       <div className="flex flex-col gap-1">
         <Suspense>
           <Settings />
+
           <SyntheticChart />
         </Suspense>
       </div>

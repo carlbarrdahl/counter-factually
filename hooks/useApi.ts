@@ -21,13 +21,13 @@ export function useChartParams() {
     {
       // Only used by frontend
       view: parseAsString.withDefault("default"),
-      smoothing: parseAsInteger.withDefault(1),
+      smoothing: parseAsInteger.withDefault(30),
 
       months_of_training: parseAsInteger.withDefault(12),
       intervention_date: parseAsString.withDefault("2023-12-01"),
 
       // Sent to backend
-      dependent: parseAsStringEnum(predictorsIds).withDefault(predictorsIds[0]),
+      dependent: parseAsStringEnum(predictorsIds).withDefault("daa"),
       predictors: parseAsArrayOf(parseAsStringEnum(predictorsIds)).withDefault([
         "market_cap_eth",
         "txcount",

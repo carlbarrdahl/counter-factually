@@ -77,6 +77,33 @@ export function Settings() {
                 <FormMessage />
               </FormItem>
             )}
+          />{" "}
+          <FormField
+            control={form.control}
+            name="dependent"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Dependent</FormLabel>
+                <FormControl>
+                  <Select value={field.value} onValueChange={field.onChange}>
+                    <SelectTrigger className="w-[200px]">
+                      <SelectValue placeholder="Dependent" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {predictors.map((predictor) => (
+                        <SelectItem
+                          key={predictor.value}
+                          value={predictor.value}
+                        >
+                          {predictor.label}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
           />
           <div className="flex gap-1">
             <FormField
@@ -151,6 +178,7 @@ export function Settings() {
             </FormItem>
           )}
         />
+
         <div className="flex-1 flex justify-end">
           <Button isLoading={Boolean(isFetching)} type="submit">
             Compute

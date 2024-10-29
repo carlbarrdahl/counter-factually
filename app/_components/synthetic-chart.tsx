@@ -9,6 +9,7 @@ import {
   Customized,
   YAxis,
   Brush,
+  Legend,
 } from "recharts";
 import { AlertCircle } from "lucide-react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
@@ -30,7 +31,8 @@ import { useApi, useChartParams } from "@/hooks/useApi";
 import { Button } from "@/components/ui/button";
 import { ChartSpline, TrendingUpDown } from "lucide-react";
 import { format } from "date-fns";
-import { cn } from "@/lib/utils";
+import { cn, formatNumber, suffixNumber } from "@/lib/utils";
+import { networks, predictors } from "@/config";
 
 const chartConfig = {
   desktop: {
@@ -60,115 +62,161 @@ export function SyntheticChart() {
       </Alert>
     );
   return (
-    <Card
-      className={cn({
-        ["animate-pulse opacity-50"]: isPending,
-      })}
-    >
-      <CardHeader>
-        <CardTitle className="flex justify-between items-center">
-          {params.view === "default" ? "Synthetic Control" : "Impact Ratio"}
+    <div>
+      <div className="mb-2 text-sm">
+        <h3 className="font-semibold">Weighted control networks</h3>
+        <div className="flex gap-4 font-mono">
+          Synthetic Control ={" "}
+          {Object.entries(data?.weights ?? {}).map(
+            ([key, val], index, array) => (
+              <div key={key}>
+                {networks.find((network) => network.value === key)?.label}{" "}
+                &times; {String(val)}
+                {index < array.length - 1 && " +"}
+              </div>
+            )
+          )}
+        </div>
+      </div>
 
-          <div className="flex gap-1 items-center">
-            <Button
-              size="sm"
-              onClick={() => setParams({ smoothing: 1 })}
-              variant={params.smoothing === 1 ? "secondary" : "outline"}
-            >
-              Daily
-            </Button>
-            <Button
-              size="sm"
-              onClick={() => setParams({ smoothing: 7 })}
-              variant={params.smoothing === 7 ? "secondary" : "outline"}
-            >
-              7 days
-            </Button>
-            <Button
-              size="sm"
-              onClick={() => setParams({ smoothing: 30 })}
-              variant={params.smoothing === 30 ? "secondary" : "outline"}
-            >
-              1 month
-            </Button>
+      <Card
+        className={cn({
+          ["animate-pulse opacity-50"]: isPending,
+        })}
+      >
+        <CardHeader>
+          <CardTitle className="flex justify-between items-center">
+            {params.view === "default" ? "Synthetic Control" : "Impact Ratio"}
 
-            <Button
-              size="icon"
-              onClick={() =>
-                setParams({
-                  view: params.view === "default" ? "impact" : "default",
-                })
+            <div className="flex gap-1 items-center">
+              <Button
+                size="sm"
+                onClick={() => setParams({ smoothing: 1 })}
+                variant={params.smoothing === 1 ? "secondary" : "outline"}
+              >
+                Daily
+              </Button>
+              <Button
+                size="sm"
+                onClick={() => setParams({ smoothing: 7 })}
+                variant={params.smoothing === 7 ? "secondary" : "outline"}
+              >
+                7 days
+              </Button>
+              <Button
+                size="sm"
+                onClick={() => setParams({ smoothing: 30 })}
+                variant={params.smoothing === 30 ? "secondary" : "outline"}
+              >
+                1 month
+              </Button>
+
+              <Button
+                size="icon"
+                onClick={() =>
+                  setParams({
+                    view: params.view === "default" ? "impact" : "default",
+                  })
+                }
+              >
+                {params.view === "default" ? (
+                  <TrendingUpDown />
+                ) : (
+                  <ChartSpline />
+                )}
+              </Button>
+            </div>
+          </CardTitle>
+          <CardDescription>
+            {predictors.find((p) => p.value === params.dependent)?.label}
+            {" - "}
+            {startDate} - {endDate}
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="relative">
+          <ChartContainer className="mx-auto" config={chartConfig}>
+            <LineChart
+              accessibilityLayer
+              data={
+                data?.data ?? [
+                  { date: "1900-01-01", treatment: 0, synthetic: 0 },
+                ]
               }
+              margin={{
+                left: 12,
+                right: 12,
+              }}
             >
-              {params.view === "default" ? <TrendingUpDown /> : <ChartSpline />}
-            </Button>
-          </div>
-        </CardTitle>
-        <CardDescription>
-          {startDate} - {endDate}
-        </CardDescription>
-      </CardHeader>
-      <CardContent>
-        <ChartContainer config={chartConfig}>
-          <LineChart
-            accessibilityLayer
-            data={
-              data?.data ?? [{ date: "1900-01-01", treatment: 0, synthetic: 0 }]
-            }
-            margin={{
-              left: 12,
-              right: 12,
-            }}
-          >
-            <CartesianGrid vertical={false} />
-            <XAxis
-              dataKey="date"
-              tickLine={false}
-              axisLine={false}
-              tickMargin={8}
-              minTickGap={64}
-              tickFormatter={(value) => format(value, "yyyy-MM-dd")}
-            />
-            <YAxis tickLine={false} axisLine={false} tickMargin={8} />
-            <ChartTooltip cursor={false} content={<ChartTooltipContent />} />
-            {params.view === "default" ? (
-              <>
+              <CartesianGrid vertical={false} />
+              <XAxis
+                dataKey="date"
+                tickLine={false}
+                axisLine={false}
+                tickMargin={8}
+                minTickGap={64}
+                tickFormatter={(value) => format(value, "yyyy-MM-dd")}
+              />
+              <YAxis
+                tickLine={false}
+                axisLine={false}
+                tickMargin={8}
+                tickFormatter={(v) => suffixNumber(v)}
+              />
+              <ChartTooltip cursor={false} content={<ChartTooltipContent />} />
+              {params.view === "default" ? (
+                <>
+                  <Line
+                    isAnimationActive={false}
+                    dataKey="treatment"
+                    type="monotone"
+                    stroke="var(--color-desktop)"
+                    strokeWidth={2}
+                    dot={false}
+                  />
+                  <Line
+                    isAnimationActive={false}
+                    dataKey="synthetic"
+                    type="monotone"
+                    stroke="var(--color-mobile)"
+                    strokeWidth={2}
+                    dot={false}
+                  />
+                </>
+              ) : (
                 <Line
                   isAnimationActive={false}
-                  dataKey="treatment"
-                  type="monotone"
-                  stroke="var(--color-desktop)"
-                  strokeWidth={2}
-                  dot={false}
-                />
-                <Line
-                  isAnimationActive={false}
-                  dataKey="synthetic"
+                  dataKey="impact_ratio"
                   type="monotone"
                   stroke="var(--color-mobile)"
                   strokeWidth={2}
                   dot={false}
                 />
-              </>
-            ) : (
-              <Line
-                isAnimationActive={false}
-                dataKey="impact_ratio"
-                type="monotone"
-                stroke="var(--color-mobile)"
-                strokeWidth={2}
-                dot={false}
+              )}
+              <Brush />
+              <Legend
+                align="right"
+                wrapperStyle={{ fontSize: 18 }}
+                verticalAlign="top"
+                formatter={(value, entry) => {
+                  console.log(value, params);
+                  return value === "treatment"
+                    ? networks.find(
+                        (network) =>
+                          network.value === params.treatment_identifier
+                      )?.label
+                    : value.charAt(0).toUpperCase() + value.slice(1);
+                  return "";
+                }}
               />
-            )}
-            <Brush />
-            <Customized
-              interventionDate={params.intervention_date}
-              component={CustomizedCross}
-            />
-          </LineChart>
-        </ChartContainer>
-      </CardContent>
-    </Card>
+              <Customized
+                interventionDate={params.intervention_date}
+                component={CustomizedCross}
+              />
+            </LineChart>
+          </ChartContainer>
+        </CardContent>
+      </Card>
+    </div>
   );
 }
 

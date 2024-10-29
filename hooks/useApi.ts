@@ -21,28 +21,36 @@ export function useChartParams() {
     {
       // Only used by frontend
       view: parseAsString.withDefault("default"),
-      smoothing: parseAsInteger.withDefault(30),
+      smoothing: parseAsInteger.withDefault(1),
 
-      months_of_training: parseAsInteger.withDefault(3),
-      intervention_date: parseAsString.withDefault("2023-01-01"),
+      months_of_training: parseAsInteger.withDefault(12),
+      intervention_date: parseAsString.withDefault("2023-12-01"),
 
       // Sent to backend
       dependent: parseAsStringEnum(predictorsIds).withDefault(predictorsIds[0]),
-      predictors: parseAsArrayOf(parseAsStringEnum(predictorsIds)).withDefault(
-        predictorsIds.slice(0, 3)
-      ),
-      treatment_identifier: parseAsStringEnum(networkIds).withDefault(
-        networkIds[1]
-      ),
+      predictors: parseAsArrayOf(parseAsStringEnum(predictorsIds)).withDefault([
+        "market_cap_eth",
+        "txcount",
+        "stables_mcap",
+        "txcosts_median_eth",
+        "fees_paid_eth",
+        "gas_per_second",
+        "tvl_eth",
+        "stables_mcap_eth",
+        "fdv_eth",
+      ]),
+      treatment_identifier:
+        parseAsStringEnum(networkIds).withDefault("arbitrum"),
       controls_identifier: parseAsArrayOf(
         parseAsStringEnum([
-          "polygon_zkevm",
-          "arbitrum",
           "ethereum",
+          "polygon_zkevm",
           "loopring",
           "metis",
           "scroll",
           "zksync_era",
+          "base",
+          "optimism",
         ])
       ).withDefault(networkIds.filter((network) => network !== networkIds[1])),
     },

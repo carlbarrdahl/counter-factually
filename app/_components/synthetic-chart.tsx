@@ -137,23 +137,9 @@ export function SyntheticChart() {
               axisLine={false}
               tickMargin={8}
               minTickGap={64}
-              tickFormatter={(value) => {
-                return format(value, "yyyy-MM-dd");
-                const date = new Date(value);
-                return date.toLocaleDateString("en-US", {
-                  month: "short",
-                  day: "numeric",
-                });
-              }}
-              // tickFormatter={(value) => value.slice(0, 3)}
+              tickFormatter={(value) => format(value, "yyyy-MM-dd")}
             />
-            <YAxis
-              // dataKey="treatment"
-              tickLine={false}
-              axisLine={false}
-              tickMargin={8}
-              // tickFormatter={(value) => value.slice(0, 3)}
-            />
+            <YAxis tickLine={false} axisLine={false} tickMargin={8} />
             <ChartTooltip cursor={false} content={<ChartTooltipContent />} />
             {params.view === "default" ? (
               <>
@@ -184,7 +170,10 @@ export function SyntheticChart() {
                 dot={false}
               />
             )}
-            <Customized component={CustomizedCross} />
+            <Customized
+              interventionDate={params.intervention_date}
+              component={CustomizedCross}
+            />
           </LineChart>
         </ChartContainer>
       </CardContent>
@@ -194,11 +183,14 @@ export function SyntheticChart() {
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const CustomizedCross = (props: any) => {
-  const { width, height, formattedGraphicalItems } = props;
+  const { width, height, formattedGraphicalItems, interventionDate } = props;
   // get first series in chart
   const firstSeries = formattedGraphicalItems[0];
   // get any point at any index in chart
-  const secondPoint = firstSeries?.props?.points[1];
+  const secondPoint = firstSeries?.props?.points.find(
+    (point) => point.payload.date === interventionDate
+  );
+  console.log({ secondPoint }, props);
   return (
     <Cross
       y={height - 30}

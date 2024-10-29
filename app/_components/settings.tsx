@@ -8,7 +8,6 @@ import { Button } from "@/components/ui/button";
 import {
   Form,
   FormControl,
-  FormDescription,
   FormField,
   FormItem,
   FormLabel,
@@ -46,15 +45,13 @@ export function Settings() {
 
   const isFetching = useIsFetching({ queryKey: ["api", params] });
 
-  //   console.log(form.formState.errors, form.watch());
-  const onSubmit = (data) => {
-    console.log("Submitted data", data);
-    setParams(data);
-  };
-
+  const treatment_identifier = form.watch("treatment_identifier");
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="">
+      <form
+        onSubmit={form.handleSubmit((values) => setParams(values))}
+        className=""
+      >
         <div className="flex gap-1 items-end">
           <FormField
             control={form.control}
@@ -88,7 +85,7 @@ export function Settings() {
                 <FormItem>
                   <FormLabel>Intervention date</FormLabel>
                   <FormControl>
-                    <Input placeholder="2023-01-01" type="tel" {...field} />
+                    <Input placeholder="2023-01-01" type="date" {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -118,14 +115,14 @@ export function Settings() {
               <FormControl>
                 <MultiSelect
                   placeholder="Select networks..."
-                  value={field.value?.map((id) =>
-                    networks.find((p) => p.value === id)
+                  value={field.value.filter(
+                    (network) => network !== treatment_identifier
                   )}
                   onChange={(values) =>
                     field.onChange(values.map((v) => v.value))
                   }
                   options={networks.filter(
-                    (network) => network.value !== params.controls_identifier
+                    (network) => network.value !== treatment_identifier
                   )}
                 />
               </FormControl>
@@ -142,9 +139,7 @@ export function Settings() {
               <FormControl>
                 <MultiSelect
                   placeholder="Select predictors..."
-                  value={field.value.map((id) =>
-                    predictors.find((p) => p.value === id)
-                  )}
+                  value={field.value}
                   onChange={(values) =>
                     field.onChange(values.map((v) => v.value))
                   }
@@ -156,7 +151,7 @@ export function Settings() {
           )}
         />
         <div className="flex-1 flex justify-end">
-          <Button isLoading={isFetching} type="submit">
+          <Button isLoading={Boolean(isFetching)} type="submit">
             Compute
           </Button>
         </div>

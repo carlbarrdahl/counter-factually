@@ -55,7 +55,6 @@ export function useApi() {
   return useQuery({
     queryKey: ["api", params],
     queryFn: async () => {
-      console.log("fetch", params);
       const {
         dependent,
         treatment_identifier,
@@ -65,7 +64,6 @@ export function useApi() {
       } = params;
 
       const intervention_date = new Date(params.intervention_date);
-      console.log({ intervention_date });
       const time_predictors_prior_start = subMonths(
         intervention_date,
         months_of_training
@@ -87,7 +85,9 @@ export function useApi() {
           dependent,
           predictors,
           treatment_identifier,
-          controls_identifier,
+          controls_identifier: controls_identifier.filter(
+            (network) => network !== treatment_identifier
+          ),
         }),
         headers: {
           "content-type": "application/json",
@@ -108,22 +108,6 @@ export function useApi() {
             })),
           };
         });
-      //   .catch((err) => {
-      //     console.log(err);
-      //     return { data: [] };
-      //   });
-      return {
-        ...mockData,
-
-        data: movingAverage(
-          mockData.data,
-          ["treatment", "synthetic"],
-          params.smoothing
-        ).map((v) => ({
-          ...v,
-          impact_ratio: v.treatment / v.synthetic,
-        })),
-      };
     },
   });
 }

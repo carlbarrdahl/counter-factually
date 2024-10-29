@@ -10,7 +10,7 @@ export const predictors = [
   { label: "Total Value Locked", value: "tvl" },
   { label: "Stablecoins Market Cap ETH", value: "stables_mcap_eth" },
   { label: "Fully Diluted Valuation ETH", value: "fdv_eth" },
-] as const;
+];
 
 export const networks = [
   { label: "Ethereum", value: "ethereum" },
@@ -22,4 +22,4 @@ export const networks = [
   { label: "Metis", value: "metis" },
   { label: "Scroll", value: "scroll" },
   { label: "ZKSync Era", value: "zksync_era" },
-] as const;
+];

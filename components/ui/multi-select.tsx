@@ -17,7 +17,7 @@ type Option = Record<"value" | "label", string>;
 interface MultiSelectProps {
   placeholder: string;
   options: Option[];
-  value: string[];
+  value?: string[];
   onChange: (selected: Option[]) => void;
 }
 
@@ -29,18 +29,18 @@ export function MultiSelect({
 }: MultiSelectProps) {
   const inputRef = React.useRef<HTMLInputElement>(null);
   const [open, setOpen] = React.useState(false);
-  const [selected, setSelected] = React.useState<Option[]>(value || []);
   const [inputValue, setInputValue] = React.useState("");
 
   const handleUnselect = React.useCallback(
     (option: Option) => {
-      setSelected((prev) => {
-        const newSelected = prev.filter((s) => s.value !== option.value);
-        onChange(newSelected);
-        return newSelected;
-      });
+      const newSelected = value.filter((v) => v !== option.value);
+      onChange(
+        newSelected.map(
+          (val) => options.find((opt) => opt.value === val) as Option
+        )
+      );
     },
-    [onChange]
+    [onChange, options, value]
   );
 
   const handleKeyDown = React.useCallback(
@@ -49,12 +49,13 @@ export function MultiSelect({
       if (input) {
         if (e.key === "Delete" || e.key === "Backspace") {
           if (input.value === "") {
-            setSelected((prev) => {
-              const newSelected = [...prev];
-              newSelected.pop();
-              onChange(newSelected);
-              return newSelected;
-            });
+            const newSelected = [...value];
+            newSelected.pop();
+            onChange(
+              newSelected.map(
+                (val) => options.find((opt) => opt.value === val) as Option
+              )
+            );
           }
         }
         // This is not a default behaviour of the <input /> field
@@ -63,12 +64,13 @@ export function MultiSelect({
         }
       }
     },
-    [onChange]
+    [onChange, options, value]
   );
 
-  const selectables = options.filter(
-    (framework) => !selected?.includes(framework)
+  const selectedOptions = value.map(
+    (val) => options.find((opt) => opt.value === val) as Option
   );
+  const selectables = options.filter((opt) => !selectedOptions.includes(opt));
 
   return (
     <Command
@@ -77,22 +79,23 @@ export function MultiSelect({
     >
       <div className="group rounded-md border border-input px-3 py-2 text-sm ring-offset-background focus-within:ring-2 focus-within:ring-ring focus-within:ring-offset-2">
         <div className="flex flex-wrap gap-1">
-          {selected.map((framework) => {
+          {selectedOptions.map((opt) => {
             return (
-              <Badge key={framework.value} variant="secondary">
-                {framework.label}
+              <Badge key={opt.value} variant="secondary">
+                {opt.label}
                 <button
+                  type="button"
                   className="ml-1 rounded-full outline-none ring-offset-background focus:ring-2 focus:ring-ring focus:ring-offset-2"
                   onKeyDown={(e) => {
                     if (e.key === "Enter") {
-                      handleUnselect(framework);
+                      handleUnselect(opt);
                     }
                   }}
                   onMouseDown={(e) => {
                     e.preventDefault();
                     e.stopPropagation();
                   }}
-                  onClick={() => handleUnselect(framework)}
+                  onClick={() => handleUnselect(opt)}
                 >
                   <X className="h-3 w-3 text-muted-foreground hover:text-foreground" />
                 </button>
@@ -116,23 +119,22 @@ export function MultiSelect({
           {open && selectables.length > 0 ? (
             <div className="absolute top-0 z-10 w-full rounded-md border bg-popover text-popover-foreground shadow-md outline-none animate-in">
               <CommandGroup className="h-full overflow-auto">
-                {selectables.map((framework) => {
+                {selectables.map((opt) => {
                   return (
                     <CommandItem
-                      key={framework.value}
+                      key={opt.value}
                       onMouseDown={(e) => {
                         e.preventDefault();
                         e.stopPropagation();
                       }}
                       onSelect={(value) => {
                         setInputValue("");
-                        const newSelected = [...selected, framework];
-                        setSelected(newSelected);
+                        const newSelected = [...selectedOptions, opt];
                         onChange(newSelected);
                       }}
                       className={"cursor-pointer"}
                     >
-                      {framework.label}
+                      {opt.label}
                     </CommandItem>
                   );
                 })}

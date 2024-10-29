@@ -8,6 +8,7 @@ import {
   XAxis,
   Customized,
   YAxis,
+  Brush,
 } from "recharts";
 import { AlertCircle } from "lucide-react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
@@ -170,6 +171,7 @@ export function SyntheticChart() {
                 dot={false}
               />
             )}
+            <Brush />
             <Customized
               interventionDate={params.intervention_date}
               component={CustomizedCross}
@@ -193,12 +195,13 @@ const CustomizedCross = (props: any) => {
   console.log({ secondPoint }, props);
   return (
     <Cross
-      y={height - 30}
+      y={height - 70}
       x={secondPoint?.x}
       height={height}
       width={width}
       stroke={"#000"}
       fill={"none"}
+      strokeDasharray="5 5"
     />
   );
 };

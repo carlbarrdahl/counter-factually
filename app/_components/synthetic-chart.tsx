@@ -78,25 +78,26 @@ export function SyntheticChart() {
       <CardHeader>
         <CardTitle className="flex justify-between items-center">
           {params.view === "default" ? "Synthetic Control" : "Impact Ratio"}
+
           <div className="flex gap-1 items-center">
             <Button
               size="sm"
               onClick={() => setParams({ smoothing: 1 })}
-              variant={params.smoothing === 1 ? "default" : "outline"}
+              variant={params.smoothing === 1 ? "secondary" : "outline"}
             >
               Daily
             </Button>
             <Button
               size="sm"
               onClick={() => setParams({ smoothing: 7 })}
-              variant={params.smoothing === 7 ? "default" : "outline"}
+              variant={params.smoothing === 7 ? "secondary" : "outline"}
             >
               7 days
             </Button>
             <Button
               size="sm"
               onClick={() => setParams({ smoothing: 30 })}
-              variant={params.smoothing === 30 ? "default" : "outline"}
+              variant={params.smoothing === 30 ? "secondary" : "outline"}
             >
               1 month
             </Button>

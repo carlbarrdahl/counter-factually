@@ -2,6 +2,9 @@
 
 - Filter Treatment Network from Control Networks
 - Intervention Line
+- Validation for Inputs (date inputs)
+- Compute button
+- Rename repo counter-factual
 
 ---
 

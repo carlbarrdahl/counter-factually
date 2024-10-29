@@ -74,11 +74,6 @@ export function useApi() {
       return fetch(apiUrl, {
         method: "POST",
         body: JSON.stringify({
-          //   time_predictors_prior_start: "2022-01-01T00:00:00",
-          //   time_predictors_prior_end: "2023-01-01T00:00:00",
-          //   time_optimize_ssr_start: "2023-01-01T00:00:00",
-          //   time_optimize_ssr_end: "2023-05-01T00:00:00",
-
           time_predictors_prior_start: time_predictors_prior_start
             .toISOString()
             .slice(0, -5),

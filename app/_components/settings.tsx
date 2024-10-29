@@ -1,4 +1,20 @@
 "use client";
+
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useForm } from "react-hook-form";
+import { z } from "zod";
+
+import { Button } from "@/components/ui/button";
+import {
+  Form,
+  FormControl,
+  FormDescription,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
 import {
   Select,
   SelectContent,
@@ -6,109 +22,145 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Input } from "@/components/ui/input";
-
-import { z } from "zod";
-
-import { Label } from "@/components/ui/label";
 import { MultiSelect } from "@/components/ui/multi-select";
-import { useState } from "react";
 import { useChartParams } from "@/hooks/useApi";
 import { networks, predictors } from "@/config";
+import { useIsFetching } from "@tanstack/react-query";
 
 const formSchema = z.object({
-  predictor_prio: z.array(z.string()),
-  optimize_ssr: z.array(z.string()),
-  predictors: z.array(z.string()),
-  network: z.string(),
+  smoothing: z.number().default(30),
+  months_of_training: z.coerce.number().default(8),
+  intervention_date: z.string().default("2023-01-01"),
   dependent: z.string(),
+  predictors: z.array(z.string()),
   treatment_identifier: z.string(),
   controls_identifier: z.array(z.string()),
 });
 
 export function Settings() {
   const [params, setParams] = useChartParams();
+  const form = useForm({
+    resolver: zodResolver(formSchema),
+    defaultValues: params,
+  });
 
-  console.log("params", params);
+  const isFetching = useIsFetching({ queryKey: ["api", params] });
+
+  //   console.log(form.formState.errors, form.watch());
+  const onSubmit = (data) => {
+    console.log("Submitted data", data);
+    setParams(data);
+  };
 
   return (
-    <div>
-      <div className="flex gap-1">
-        <div>
-          <Label>Treatment Network</Label>
+    <Form {...form}>
+      <form onSubmit={form.handleSubmit(onSubmit)} className="">
+        <div className="flex gap-1 items-end">
+          <FormField
+            control={form.control}
+            name="treatment_identifier"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Treatment Network</FormLabel>
+                <FormControl>
+                  <Select value={field.value} onValueChange={field.onChange}>
+                    <SelectTrigger className="w-[180px]">
+                      <SelectValue placeholder="Network" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {networks.map((network) => (
+                        <SelectItem key={network.value} value={network.value}>
+                          {network.label}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
           <div className="flex gap-1">
-            <Select
-              value={params.treatment_identifier}
-              onValueChange={(treatment_identifier) =>
-                setParams({ treatment_identifier })
-              }
-            >
-              <SelectTrigger className="w-[180px]">
-                <SelectValue placeholder="Network" />
-              </SelectTrigger>
-              <SelectContent>
-                {networks.map((network) => (
-                  <SelectItem key={network.value} value={network.value}>
-                    {network.label}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-        </div>
-        <div className="flex gap-1">
-          <div>
-            <Label>Intervention date</Label>
-            <div className="flex gap-1">
-              <Input
-                placeholder="2023-01-01"
-                value={params.intervention_date}
-                onChange={(e) => {
-                  setParams({ intervention_date: e.target.value });
-                }}
-              />
-            </div>
-          </div>
-          <div className="w-[140px]">
-            <Label>Months of training</Label>
-            <Input
-              type="number"
-              value={params.months_of_training}
-              onChange={(e) =>
-                setParams({ months_of_training: e.target.value })
-              }
+            <FormField
+              control={form.control}
+              name="intervention_date"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Intervention date</FormLabel>
+                  <FormControl>
+                    <Input placeholder="2023-01-01" type="tel" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="months_of_training"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Months of training</FormLabel>
+                  <FormControl>
+                    <Input type="number" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
             />
           </div>
         </div>
-      </div>
-      <div className="flex-1">
-        <Label>Control Networks</Label>
-        <MultiSelect
-          placeholder="Select networks..."
-          value={params.controls_identifier?.map((id) =>
-            networks.find((p) => p.value === id)
-          )}
-          onChange={(values) =>
-            setParams({ controls_identifier: values.map((v) => v.value) })
-          }
-          options={networks.filter(
-            (network) => network.value !== params.controls_identifier
+        <FormField
+          control={form.control}
+          name="controls_identifier"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Control Networks</FormLabel>
+              <FormControl>
+                <MultiSelect
+                  placeholder="Select networks..."
+                  value={field.value?.map((id) =>
+                    networks.find((p) => p.value === id)
+                  )}
+                  onChange={(values) =>
+                    field.onChange(values.map((v) => v.value))
+                  }
+                  options={networks.filter(
+                    (network) => network.value !== params.controls_identifier
+                  )}
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
           )}
         />
-      </div>
-      <div className="flex-1">
-        <Label>Predictors</Label>
-        <MultiSelect
-          placeholder="Select predictors..."
-          value={params.predictors.map((id) =>
-            predictors.find((p) => p.value === id)
+        <FormField
+          control={form.control}
+          name="predictors"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Predictors</FormLabel>
+              <FormControl>
+                <MultiSelect
+                  placeholder="Select predictors..."
+                  value={field.value.map((id) =>
+                    predictors.find((p) => p.value === id)
+                  )}
+                  onChange={(values) =>
+                    field.onChange(values.map((v) => v.value))
+                  }
+                  options={predictors}
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
           )}
-          onChange={(values) =>
-            setParams({ predictors: values.map((v) => v.value) })
-          }
-          options={predictors}
         />
-      </div>
-    </div>
+        <div className="flex-1 flex justify-end">
+          <Button isLoading={isFetching} type="submit">
+            Compute
+          </Button>
+        </div>
+      </form>
+    </Form>
   );
 }

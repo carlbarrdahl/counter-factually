@@ -28,20 +28,9 @@ import {
 } from "@/components/ui/chart";
 import { useApi, useChartParams } from "@/hooks/useApi";
 import { Button } from "@/components/ui/button";
-import { ChartNoAxesGantt, ChartSpline, TrendingUpDown } from "lucide-react";
+import { ChartSpline, TrendingUpDown } from "lucide-react";
 import { format } from "date-fns";
 import { cn } from "@/lib/utils";
-
-export const description = "A multiple line chart";
-
-const chartData = [
-  { month: "January", desktop: 586, mobile: 80 },
-  { month: "February", desktop: 305, mobile: 200 },
-  { month: "March", desktop: 237, mobile: 120 },
-  { month: "April", desktop: 73, mobile: 190 },
-  { month: "May", desktop: 209, mobile: 130 },
-  { month: "June", desktop: 214, mobile: 140 },
-];
 
 const chartConfig = {
   desktop: {
@@ -192,7 +181,6 @@ const CustomizedCross = (props: any) => {
   const secondPoint = firstSeries?.props?.points.find(
     (point) => point.payload.date === interventionDate
   );
-  console.log({ secondPoint }, props);
   return (
     <Cross
       y={height - 70}

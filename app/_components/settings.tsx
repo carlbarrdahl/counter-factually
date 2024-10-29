@@ -44,12 +44,13 @@ export function Settings() {
   });
 
   const isFetching = useIsFetching({ queryKey: ["api", params] });
-
   const treatment_identifier = form.watch("treatment_identifier");
   return (
     <Form {...form}>
       <form
-        onSubmit={form.handleSubmit((values) => setParams(values))}
+        onSubmit={form.handleSubmit((values) =>
+          setParams({ ...params, ...values })
+        )}
         className=""
       >
         <div className="flex gap-1 items-end">

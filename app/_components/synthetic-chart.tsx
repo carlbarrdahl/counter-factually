@@ -65,14 +65,16 @@ export function SyntheticChart() {
     <div>
       <div className="mb-2 text-sm">
         <h3 className="font-semibold">Weighted control networks</h3>
-        <div className="flex gap-4 font-mono">
+        <div className="flex gap-2 font-mono">
           Synthetic Control ={" "}
           {Object.entries(data?.weights ?? {}).map(
             ([key, val], index, array) => (
               <div key={key}>
                 {networks.find((network) => network.value === key)?.label}{" "}
                 &times; {String(val)}
-                {index < array.length - 1 && " +"}
+                <span className="font-bold">
+                  {index < array.length - 1 && " +"}
+                </span>
               </div>
             )
           )}

@@ -1,26 +1,11 @@
+Data-driven impact-based counter-factuals.
+
 ### TODO
 
-- [ ] Filter Treatment Network from Control Networks
-- [ ] Intervention Line
-- [ ] Validation for Inputs (date inputs)
-- [x] Compute button
-- [x] Rename repo counter-factual
-
----
-
-- predictor_prio
-  - from date
-  - to date
-- optimize_ssr
-  - from date
-  - to date
-- predictors (growthepie)
-  - market_cap_eth
-  - txcount
-  - fees_paid_eth
-  - txcosts_median_eth
-- dependent
-  - daa
-- network
-- treatment_identifier
-- controls_identifier (array)
+- [ ] Create iframe route
+- [ ] Map URL params to API to simplify
+  - Calculate values in `setParams`
+- [ ] Explore OSO data
+- [ ] Counter-factuals Hub
+  - Dashboard of preset charts
+- [ ] Explore LLM analysis of charts

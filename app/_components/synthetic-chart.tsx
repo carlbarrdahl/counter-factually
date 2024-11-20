@@ -27,12 +27,14 @@ import {
   ChartTooltip,
   ChartTooltipContent,
 } from "@/components/ui/chart";
-import { useApi, useChartParams } from "@/hooks/useApi";
+import { Components, useApi, useChartParams } from "@/hooks/useApi";
 import { Button } from "@/components/ui/button";
 import { ChartSpline, TrendingUpDown } from "lucide-react";
 import { format } from "date-fns";
-import { cn, formatNumber, suffixNumber } from "@/lib/utils";
+import { cn, suffixNumber } from "@/lib/utils";
 import { networks, predictors } from "@/config";
+import { Weights } from "./weights";
+import { Settings } from "./settings";
 
 const chartConfig = {
   desktop: {
@@ -48,7 +50,6 @@ const chartConfig = {
 export function SyntheticChart() {
   const { data, isPending, error } = useApi();
   const [params, setParams] = useChartParams();
-  console.log(123, data);
 
   const startDate = data?.data[0]?.date;
   const endDate = data?.data[data?.data.length - 1]?.date;
@@ -63,71 +64,61 @@ export function SyntheticChart() {
     );
   return (
     <div>
-      <div className="mb-2 text-sm">
-        <h3 className="font-semibold">Weighted control networks</h3>
-        <div className="flex gap-2 font-mono">
-          Synthetic Control ={" "}
-          {Object.entries(data?.weights ?? {}).map(
-            ([key, val], index, array) => (
-              <div key={key}>
-                {networks.find((network) => network.value === key)?.label}{" "}
-                &times; {String(val)}
-                <span className="font-bold">
-                  {index < array.length - 1 && " +"}
-                </span>
-              </div>
-            )
-          )}
-        </div>
-      </div>
+      {params.show.includes(Components.settings) && <Settings />}
+      {params.show.includes(Components.brush) && <Weights />}
 
       <Card
-        className={cn({
-          ["animate-pulse opacity-50"]: isPending,
-        })}
+        className={cn(
+          // "border-none shadow-none",
+          {
+            ["animate-pulse opacity-50"]: isPending,
+          }
+        )}
       >
         <CardHeader>
           <CardTitle className="flex justify-between items-center">
             {params.view === "default" ? "Synthetic Control" : "Impact Ratio"}
 
-            <div className="flex gap-1 items-center">
-              <Button
-                size="sm"
-                onClick={() => setParams({ smoothing: 1 })}
-                variant={params.smoothing === 1 ? "secondary" : "outline"}
-              >
-                Daily
-              </Button>
-              <Button
-                size="sm"
-                onClick={() => setParams({ smoothing: 7 })}
-                variant={params.smoothing === 7 ? "secondary" : "outline"}
-              >
-                7 days
-              </Button>
-              <Button
-                size="sm"
-                onClick={() => setParams({ smoothing: 30 })}
-                variant={params.smoothing === 30 ? "secondary" : "outline"}
-              >
-                1 month
-              </Button>
+            {params.show.includes(Components.smoothing) && (
+              <div className="flex gap-1 items-center">
+                <Button
+                  size="sm"
+                  onClick={() => setParams({ smoothing: 1 })}
+                  variant={params.smoothing === 1 ? "secondary" : "outline"}
+                >
+                  Daily
+                </Button>
+                <Button
+                  size="sm"
+                  onClick={() => setParams({ smoothing: 7 })}
+                  variant={params.smoothing === 7 ? "secondary" : "outline"}
+                >
+                  7 days
+                </Button>
+                <Button
+                  size="sm"
+                  onClick={() => setParams({ smoothing: 30 })}
+                  variant={params.smoothing === 30 ? "secondary" : "outline"}
+                >
+                  1 month
+                </Button>
 
-              <Button
-                size="icon"
-                onClick={() =>
-                  setParams({
-                    view: params.view === "default" ? "impact" : "default",
-                  })
-                }
-              >
-                {params.view === "default" ? (
-                  <TrendingUpDown />
-                ) : (
-                  <ChartSpline />
-                )}
-              </Button>
-            </div>
+                <Button
+                  size="icon"
+                  onClick={() =>
+                    setParams({
+                      view: params.view === "default" ? "impact" : "default",
+                    })
+                  }
+                >
+                  {params.view === "default" ? (
+                    <TrendingUpDown />
+                  ) : (
+                    <ChartSpline />
+                  )}
+                </Button>
+              </div>
+            )}
           </CardTitle>
           <CardDescription>
             {predictors.find((p) => p.value === params.dependent)?.label}
@@ -194,13 +185,12 @@ export function SyntheticChart() {
                   dot={false}
                 />
               )}
-              <Brush />
+              {params.show.includes(Components.brush) && <Brush />}
               <Legend
                 align="right"
                 wrapperStyle={{ fontSize: 18 }}
                 verticalAlign="top"
                 formatter={(value, entry) => {
-                  console.log(value, params);
                   return value === "treatment"
                     ? networks.find(
                         (network) =>
